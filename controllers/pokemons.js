@@ -4,13 +4,36 @@ exports.getPokemons = async (req, res) => {
   res.send(rows);
 };
 exports.getPokemon = async (req, res) => {
-  const { nombre } = req.params;
+  const { id } = req.params;
   const { rows } = await pool.query(
-    " SELECT  * FROM public.stats st JOIN pokemon po ON po.pokemonid = st.pokemonid  WHERE st.id =$1",
-    [nombre]
+    `SELECT  * 
+    FROM public.stats st 
+    JOIN pokemon po 
+    ON po.id = st.pokemonid 
+    JOIN movimientos mo 
+    ON po.id = mo.pokemonid
+    WHERE po.id =$1`,
+    [id]
   );
   if (rows[0]) {
-    res.send(nombre[0]);
+    res.status(200).json({
+      id: rows[0].id,
+      stats: {
+        hp: rows[0].hp,
+        atk: rows[0].atk,
+        def: rows[0].def,
+        satk: rows[0].satk,
+        sdef: rows[0].sdef,
+        spd: rows[0].spd,
+      },
+      movimientos: [rows[0].movimiento1, rows[0].movimiento2],
+      nombre: rows[0].nombre,
+      numero: rows[0].numero,
+      color: rows[0].color,
+      peso: rows[0].peso,
+      altura: rows[0].altura,
+      descripcion: rows[0].descripcion,
+    });
   } else {
     res.sendStatus(404);
   }
