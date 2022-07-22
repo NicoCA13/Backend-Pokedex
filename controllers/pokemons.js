@@ -12,9 +12,18 @@ exports.getPokemon = async (req, res) => {
     ON po.id = st.pokemonid 
     JOIN movimientos mo 
     ON po.id = mo.pokemonid
-    WHERE po.id =$1`,
+    JOIN elementos ele 
+    ON po.id = ele.pokemonid
+    WHERE po.id = $1`,
     [id]
   );
+  const { rows: next } = await pool.query(
+    `SELECT id 
+    FROM pokemon
+     WHERE id = $1`,
+    [parseInt(id) + 1]
+  );
+
   if (rows[0]) {
     res.status(200).json({
       id: rows[0].id,
@@ -26,13 +35,18 @@ exports.getPokemon = async (req, res) => {
         sdef: rows[0].sdef,
         spd: rows[0].spd,
       },
-      movimientos: [rows[0].movimiento1, rows[0].movimiento2],
+      elementos: [rows[0].elemento1, rows[0].elemento2],
+      movimientos: {
+        movimiento1: rows[0].movimiento1,
+        movimiento2: rows[0].movimiento2,
+      },
       nombre: rows[0].nombre,
       numero: rows[0].numero,
       color: rows[0].color,
       peso: rows[0].peso,
       altura: rows[0].altura,
       descripcion: rows[0].descripcion,
+      next: next[0]?.id || null,
     });
   } else {
     res.sendStatus(404);
