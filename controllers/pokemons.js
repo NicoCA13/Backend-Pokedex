@@ -1,7 +1,21 @@
+const { rows } = require("pg/lib/defaults.js");
 const { pool } = require("../database/conection.js");
 exports.getPokemons = async (req, res) => {
-  const { rows } = await pool.query("select * from public.pokemon");
-  res.send(rows);
+  const { rows } = await pool.query(
+    "select * from pokemon  JOIN elementos ele ON pokemon.id = ele.pokemonid"
+  );
+  res.send(
+    rows.map((pok) => ({
+      id: pok.id,
+      elementos: [pok.elemento1, pok.elemento2],
+      nombre: pok.nombre,
+      numero: pok.numero,
+      color: pok.color,
+      peso: pok.peso,
+      altura: pok.altura,
+      descripcion: pok.descripcion,
+    }))
+  );
 };
 exports.getPokemon = async (req, res) => {
   const { id } = req.params;
@@ -15,7 +29,7 @@ exports.getPokemon = async (req, res) => {
     JOIN elementos ele 
     ON po.id = ele.pokemonid
     WHERE po.id = $1`,
-    [id]
+    [parseInt(id)]
   );
   const { rows: next } = await pool.query(
     `SELECT id 
@@ -23,6 +37,13 @@ exports.getPokemon = async (req, res) => {
      WHERE id = $1`,
     [parseInt(id) + 1]
   );
+  // exports.deletePokemon = async (req, res) => {
+  //   const { id } = req.params;
+  //   const { rows } = await pool.query(
+  //     `DELETE FROM public.pokemon
+  //     WHERE id=$1`,
+  //     [parseInt(id)]
+  //   );
 
   if (rows[0]) {
     res.status(200).json({
@@ -73,9 +94,9 @@ exports.putPokemons = (req, res) => {
 exports.deletePokemons = (req, res) => {
   const pokemon = req.body;
   const { id } = req.params;
-  const pokemonABorrar = Pokemones.findIndex((p) => p.numero === id);
-  Pokemones.splice(pokemonABorrar, 1)[pokemonABorrar] = pokemon;
-  return res.send(Pokemones[pokemonABorrar]);
+  const pokemonABorrar = pokemon.findIndex((p) => p.numero === id);
+  pokemon.splice(pokemonABorrar, 1)[pokemonABorrar] = pokemon;
+  return res.send(pokemon[pokemonABorrar]);
 };
 function encontrarPorTypes(pokemonesFiltrados, type1) {
   pokemonesFiltrados = pokemonesFiltrados.filter((e) =>
