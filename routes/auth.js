@@ -4,13 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { TOKEN_SECRET } = require("../middlewares/validate-jwt");
 const { pool } = require("../database/conection.js");
-const users = [
-  {
-    name: "",
-    mail: "",
-    password: "",
-  },
-];
+
 router.post("/register", async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const password = await bcrypt.hash(req.body.password, salt);
@@ -20,13 +14,7 @@ router.post("/register", async (req, res) => {
      VALUES ( $1, $2, $3)`,
     [req.body.name, req.body.mail, password]
   );
-  const newUser = {
-    name: req.body.name,
-    mail: req.body.mail,
-    password: password,
-  };
-  users.push(newUser);
-  return res.json({ success: true, newUser, users });
+  res.sendStatus(200);
 });
 router.post("/login", async (req, res) => {
   const salt = await bcrypt.genSalt(10);

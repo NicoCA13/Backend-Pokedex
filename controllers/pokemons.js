@@ -118,7 +118,6 @@ exports.postPokemons = async (req, res) => {
       `INSERT INTO public.elementos(elemento1, pokemonid, elemento2)VALUES ($1, $2, $3) `,
       [req.body.elemento1, id, req.body.elemento2]
     );
-    rs;
   } catch (error) {
     console.log(error);
   }
